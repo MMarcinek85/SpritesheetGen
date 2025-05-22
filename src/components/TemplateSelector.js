@@ -6,7 +6,8 @@ class TemplateSelector extends Component {
         super(props);
         this.state = {
             selectedTemplate: null,
-            templates: []
+            templates: [],
+            error: null
         };
     }
 
@@ -15,26 +16,31 @@ class TemplateSelector extends Component {
     }
 
     fetchTemplates = async () => {
-        // Fetch available templates (this could be from a local file or an API)
-        const templates = await this.loadTemplatesFromPublic();
+        // List of available templates
+        const templateNames = ['walk', 'run', 'idle'];
+        
+        // Create template objects with display names
+        const templates = templateNames.map(name => ({
+            name,
+            displayName: name.charAt(0).toUpperCase() + name.slice(1)
+        }));
+        
         this.setState({ templates });
     }
 
-    loadTemplatesFromPublic = async () => {
-        const response = await fetch('/templates/topDownCharacter.js');
-        const templates = await response.json();
-        return templates;
-    }
-
-    handleTemplateChange = (event) => {
-        const selectedTemplate = event.target.value;
-        this.setState({ selectedTemplate });
-        this.applyTemplate(selectedTemplate);
-    }
-
-    applyTemplate = (templateName) => {
-        const template = loadTemplate(templateName);
-        this.props.onTemplateSelected(template);
+    handleTemplateChange = async (event) => {
+        const templateName = event.target.value;
+        if (!templateName) return;
+        
+        try {
+            this.setState({ error: null });
+            const template = await loadTemplate(templateName);
+            this.setState({ selectedTemplate: templateName });
+            this.props.onTemplateSelected(template);
+        } catch (error) {
+            console.error('Failed to load template:', error);
+            this.setState({ error: `Failed to load template: ${error.message}` });
+        }
     }
 
     render() {
@@ -49,6 +55,12 @@ class TemplateSelector extends Component {
                         </option>
                     ))}
                 </select>
+                
+                {this.state.error && (
+                    <div className="error-message" style={{color: "red", marginTop: "10px"}}>
+                        {this.state.error}
+                    </div>
+                )}
             </div>
         );
     }

@@ -100,10 +100,11 @@ export async function loadTemplate(templateName) {
         if (!response.ok) {
             throw new Error(`Failed to load template: ${response.statusText}`);
         }
-        return await response.json();
+        const template = await response.json();
+        return template;
     } catch (error) {
-        console.error('Error loading template:', error);
-        return null;
+        console.error(`Error loading template "${templateName}":`, error);
+        throw error;
     }
 }
 
