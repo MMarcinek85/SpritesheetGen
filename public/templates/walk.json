@@ -1,0 +1,92 @@
+{
+  "name": "walk",
+  "frames": [
+    {
+      "id": 1,
+      "parts": {
+        "body": {
+          "position": { "x": 50, "y": 100 },
+          "size": { "width": 32, "height": 32 }
+        },
+        "leftLeg": {
+          "position": { "x": 50, "y": 130 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "rightLeg": {
+          "position": { "x": 70, "y": 130 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "leftArm": {
+          "position": { "x": 30, "y": 100 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "rightArm": {
+          "position": { "x": 70, "y": 100 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "head": {
+          "position": { "x": 50, "y": 80 },
+          "size": { "width": 32, "height": 32 }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "parts": {
+        "body": {
+          "position": { "x": 50, "y": 100 },
+          "size": { "width": 32, "height": 32 }
+        },
+        "leftLeg": {
+          "position": { "x": 50, "y": 120 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "rightLeg": {
+          "position": { "x": 70, "y": 120 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "leftArm": {
+          "position": { "x": 30, "y": 100 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "rightArm": {
+          "position": { "x": 70, "y": 90 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "head": {
+          "position": { "x": 50, "y": 80 },
+          "size": { "width": 32, "height": 32 }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "parts": {
+        "body": {
+          "position": { "x": 50, "y": 100 },
+          "size": { "width": 32, "height": 32 }
+        },
+        "leftLeg": {
+          "position": { "x": 50, "y": 130 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "rightLeg": {
+          "position": { "x": 70, "y": 130 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "leftArm": {
+          "position": { "x": 30, "y": 90 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "rightArm": {
+          "position": { "x": 70, "y": 100 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "head": {
+          "position": { "x": 50, "y": 80 },
+          "size": { "width": 32, "height": 32 }
+        }
+      }
+    }
+  ]
+}

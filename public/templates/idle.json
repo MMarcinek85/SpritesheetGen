@@ -1,0 +1,23 @@
+{
+  "name": "idle",
+  "frames": [
+    {
+      "image": "frame1.png",
+      "duration": 100
+    },
+    {
+      "image": "frame2.png",
+      "duration": 100
+    },
+    {
+      "image": "frame3.png",
+      "duration": 100
+    },
+    {
+      "image": "frame4.png",
+      "duration": 100
+    }
+  ],
+  "loop": true,
+  "direction": "forward"
+}

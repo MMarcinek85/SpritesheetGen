@@ -1,0 +1,58 @@
+{
+  "animation": {
+    "name": "Run",
+    "frames": [
+      {
+        "frame": 1,
+        "parts": {
+          "body": {
+            "position": { "x": 10, "y": 20 },
+            "size": { "width": 32, "height": 32 }
+          },
+          "leftLeg": {
+            "position": { "x": 10, "y": 40 },
+            "size": { "width": 10, "height": 20 }
+          },
+          "rightLeg": {
+            "position": { "x": 20, "y": 40 },
+            "size": { "width": 10, "height": 20 }
+          },
+          "leftArm": {
+            "position": { "x": 0, "y": 20 },
+            "size": { "width": 10, "height": 20 }
+          },
+          "rightArm": {
+            "position": { "x": 30, "y": 20 },
+            "size": { "width": 10, "height": 20 }
+          }
+        }
+      },
+      {
+        "frame": 2,
+        "parts": {
+          "body": {
+            "position": { "x": 10, "y": 20 },
+            "size": { "width": 32, "height": 32 }
+          },
+          "leftLeg": {
+            "position": { "x": 15, "y": 40 },
+            "size": { "width": 10, "height": 20 }
+          },
+          "rightLeg": {
+            "position": { "x": 10, "y": 40 },
+            "size": { "width": 10, "height": 20 }
+          },
+          "leftArm": {
+            "position": { "x": 0, "y": 20 },
+            "size": { "width": 10, "height": 20 }
+          },
+          "rightArm": {
+            "position": { "x": 30, "y": 20 },
+            "size": { "width": 10, "height": 20 }
+          }
+        }
+      }
+    ],
+    "duration": 500
+  }
+}
