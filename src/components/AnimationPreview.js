@@ -52,55 +52,80 @@ class AnimationPreview extends Component {
         const frame = frames[frameIndex];
         this.clearCanvas();
         
-        // If frame contains a dataURL (for user-created frames)
-        if (frame.dataURL) {
-            const img = new Image();
-            img.onload = () => {
-                this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-            };
-            img.src = frame.dataURL;
-            return;
-        }
-        
-        // If frame contains a single image data URL
-        if (frame.imageData) {
-            const img = new Image();
-            img.onload = () => {
-                this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-            };
-            img.src = frame.imageData;
-            return;
-        }
-        
-        // If frame contains multiple parts
-        if (frame.parts) {
-            Object.entries(frame.parts).forEach(([partName, part]) => {
-                if (part.imageData) {
-                    const img = new Image();
-                    img.onload = () => {
-                        this.ctx.save();
-                        
-                        // Apply transformations
-                        this.ctx.translate(part.position.x, part.position.y);
-                        
-                        if (part.rotation) {
-                            const pivotX = part.pivot?.x || 0;
-                            const pivotY = part.pivot?.y || 0;
-                            this.ctx.translate(pivotX, pivotY);
-                            this.ctx.rotate(part.rotation * Math.PI / 180);
-                            this.ctx.translate(-pivotX, -pivotY);
-                        }
-                        
-                        if (part.scale) {
-                            this.ctx.scale(part.scale.x, part.scale.y);
-                        }
-                        
-                        this.ctx.drawImage(img, 0, 0);
-                        this.ctx.restore();
-                    };
-                    img.src = part.imageData;
-                }
-            });
+        try {
+            // If frame contains a dataURL (for user-created frames)
+            if (frame.dataURL) {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+                    } catch (error) {
+                        console.error("Error drawing image to canvas:", error);
+                    }
+                };
+                img.onerror = (error) => {
+                    console.error("Error loading image from dataURL:", error);
+                };
+                img.src = frame.dataURL;
+                return;
+            }
+            
+            // If frame contains a single image data URL
+            if (frame.imageData) {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+                    } catch (error) {
+                        console.error("Error drawing image to canvas:", error);
+                    }
+                };
+                img.onerror = (error) => {
+                    console.error("Error loading image from imageData:", error);
+                };
+                img.src = frame.imageData;
+                return;
+            }
+            
+            // If frame contains multiple parts
+            if (frame.parts) {
+                Object.entries(frame.parts).forEach(([partName, part]) => {
+                    if (part.imageData) {
+                        const img = new Image();
+                        img.onload = () => {
+                            try {
+                                this.ctx.save();
+                                
+                                // Apply transformations
+                                this.ctx.translate(part.position.x, part.position.y);
+                                
+                                if (part.rotation) {
+                                    const pivotX = part.pivot?.x || 0;
+                                    const pivotY = part.pivot?.y || 0;
+                                    this.ctx.translate(pivotX, pivotY);
+                                    this.ctx.rotate(part.rotation * Math.PI / 180);
+                                    this.ctx.translate(-pivotX, -pivotY);
+                                }
+                                
+                                if (part.scale) {
+                                    this.ctx.scale(part.scale.x, part.scale.y);
+                                }
+                                
+                                this.ctx.drawImage(img, 0, 0);
+                                this.ctx.restore();
+                            } catch (error) {
+                                console.error("Error drawing part to canvas:", error);
+                            }
+                        };
+                        img.onerror = (error) => {
+                            console.error(`Error loading part image (${partName}):`, error);
+                        };
+                        img.src = part.imageData;
+                    }
+                });
+            }
+        } catch (error) {
+            console.error("Error in drawFrame:", error);
         }
     }
     

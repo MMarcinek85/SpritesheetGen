@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/main.css';
 
 // Helper to format a line of Markdown text, potentially containing inline styles.
@@ -39,11 +39,11 @@ const AiFormPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    // Create a stable reference to answers for use in callbacks
-    const answersRef = useRef(answers);
+    // Debug effect - must be placed before any conditional returns
     useEffect(() => {
-        answersRef.current = answers;
-        console.log("Answers state updated:", answers);
+        if (Object.keys(answers).length > 0) {
+            console.log("Answers state updated:", answers);
+        }
     }, [answers]);
     
     useEffect(() => {
@@ -77,26 +77,31 @@ const AiFormPage = () => {
         
         // Call the fetch function
         fetchMarkdown();
-    }, []);
-
-    const handleInputChange = (id, value) => {
+    }, []);const handleInputChange = useCallback((id, value) => {
         console.log(`Updating answer for ${id}:`, value);
         setAnswers(prevAnswers => {
+            console.log(`Previous answers:`, prevAnswers);
             const newAnswers = {
                 ...prevAnswers,
                 [id]: value
             };
+            console.log(`New answers:`, newAnswers);
             return newAnswers;
         });
-    };
+    }, []);
+      // Stable reference to answers state for use in event handlers
+    const answersRef = React.useRef(answers);
+    // Update the ref when answers change
+    useEffect(() => {
+        answersRef.current = answers;
+    }, [answers]);
     
-    function renderFormElements() {
+    const renderFormElements = useCallback(() => {
         if (!markdownContent) return [];
 
         const lines = markdownContent.split('\n');
         const elements = [];
         let currentQuestionId = null;
-        let lastQuestionId = null; // Track the last seen question ID
         let inCheckboxList = false;
         let checkboxItems = [];
         let inUlList = false;
@@ -105,13 +110,13 @@ const AiFormPage = () => {
         let olItems = [];
         let currentListNumber = 1;
         
-        // Use the latest answers state directly
-        const currentAnswers = answers || {};
+        // Use a safe copy of answers from the ref
+        const currentAnswers = answersRef.current;
 
         const closeCheckboxList = () => {
             if (inCheckboxList && checkboxItems.length > 0) {
                 // Generate a unique key for each checkbox list
-                const listKey = `checkbox-list-${currentQuestionId || elements.length}-${Math.random().toString(36).substring(2, 9)}`;
+                const listKey = `checkbox-list-${currentQuestionId || elements.length}-${Math.random().toString(36).substr(2, 9)}`;
                 elements.push(
                     <ul key={listKey} className="form-checkbox-list">
                         {checkboxItems}
@@ -177,64 +182,32 @@ const AiFormPage = () => {
             if (questionIdMatch) {
                 closeAllLists();
                 currentQuestionId = questionIdMatch[1];
-                lastQuestionId = currentQuestionId; // Update last seen question ID
                 const questionTextHtml = formatLineAsHtml(line.replace(/^\s*\*\s*/, ''));
                 elements.push(
                     <div key={`question-${currentQuestionId}`} className="form-question-block"
                          dangerouslySetInnerHTML={{ __html: questionTextHtml }} />
                 );
                 return;
-            }
-
-            // 3. "Your Answer" Line
-            if ((trimmedLine.toLowerCase().startsWith('*   your answer') || trimmedLine.toLowerCase().startsWith('* your answer'))) {
-                // Generate a field ID that is guaranteed to be unique (line index) but also maintains question association
-                // This ID will be used both as a React key and as the state key for this specific textarea
-                const fieldId = lastQuestionId ? `field-${lastQuestionId}-${index}` : `field-unknown-${index}`;
-                
-                if (!lastQuestionId) {
-                    console.warn(`No question ID found for answer at line ${index}. Using fallback ID: ${fieldId}`);
-                } else {
-                    console.log(`Creating answer field with ID: ${fieldId} for question ${lastQuestionId} at line ${index}`);
-                }
-                
+            }            // 3. "Your Answer" Line
+            if (currentQuestionId && (trimmedLine.toLowerCase().startsWith('*   your answer') || trimmedLine.toLowerCase().startsWith('* your answer'))) {
                 closeAllLists();
-                
                 elements.push(
-                    <div key={`container-${fieldId}`} className="textarea-container">
-                        <textarea
-                            id={fieldId}
-                            key={fieldId}
+                    <div key={`answer-container-${currentQuestionId}`} className="textarea-container">                        <textarea
+                            id={`answer-${currentQuestionId}`}
                             className="form-answer-textarea"
-                            // Use fieldId as the state key rather than lastQuestionId
-                            value={currentAnswers[fieldId] || ''}
+                            value={currentAnswers[currentQuestionId] || ''}
                             onChange={(e) => {
-                                const value = e.target.value;
-                                console.log(`Textarea change for fieldId=${fieldId} (question=${lastQuestionId}, line=${index}):`, value);
-                                handleInputChange(fieldId, value);
+                                console.log(`Textarea change for ${currentQuestionId}:`, e.target.value);
+                                handleInputChange(currentQuestionId, e.target.value);
                             }}
-                            onFocus={(e) => console.log(`Textarea focused: fieldId=${fieldId}, question=${lastQuestionId}, line=${index}`)}
+                            onFocus={(e) => console.log(`Textarea focused: ${currentQuestionId}`)}
                             placeholder="Type your answer here..."
                             rows={trimmedLine.toLowerCase().includes('(list)') ? 6 : 3}
-                            style={{
-                                // Direct inline styles to override any problematic CSS
-                                color: 'black',
-                                backgroundColor: 'white',
-                                border: '2px solid #3498db',
-                                padding: '10px',
-                                width: '100%',
-                                minHeight: '80px',
-                                zIndex: 1000,
-                                opacity: 1,
-                                position: 'relative'
-                            }}
                         />
                     </div>
                 );
                 return;
-            }
-
-            // 4. Checkbox Line
+            }            // 4. Checkbox Line
             const checkboxMatch = currentQuestionId && trimmedLine.match(/^\s*\*\s*\[( |x)\]\s*(.*)/i);
             if (checkboxMatch) {
                 // Close other list types if open
@@ -251,8 +224,7 @@ const AiFormPage = () => {
                         checkboxItems = [];
                     }
                 }
-
-                const labelText = checkboxMatch[2];
+                  const labelText = checkboxMatch[2];
                 const isOtherOption = labelText.toLowerCase().includes('other') || 
                                     labelText.toLowerCase().includes('please describe');
                 // Create a more unique ID based on the question ID, label and index
@@ -261,8 +233,7 @@ const AiFormPage = () => {
                 
                 const item = (
                     <li key={uniqueKey} className="form-checkbox-item">
-                        <div className="checkbox-container">
-                            <input
+                        <div className="checkbox-container">                            <input
                                 type="checkbox"
                                 id={checkboxId}
                                 checked={!!currentAnswers[checkboxId]}
@@ -305,8 +276,7 @@ const AiFormPage = () => {
                 return;
             }
 
-            // 5. Generic list items
-            const ulItemMatch = trimmedLine.match(/^\s*\*\s+(.*)/);
+            // 5. Generic list items            const ulItemMatch = trimmedLine.match(/^\s*\*\s+(.*)/);
             // Exclude lines that are section headers or user answers prompts
             const isSpecialBullet = trimmedLine.includes('**') && (trimmedLine.includes('Question:') || trimmedLine.toLowerCase().includes('your answer'));
             
@@ -367,20 +337,13 @@ const AiFormPage = () => {
             if (formattedLine) {
                 elements.push(<div key={`line-${index}`} dangerouslySetInnerHTML={{ __html: formattedLine }} />);
             }
-        });
-
-        closeAllLists();
+        });        closeAllLists();
         return elements;
-    }
-
-    const handleDownloadAnswers = () => {
+    }, [markdownContent, handleInputChange]);const handleDownloadAnswers = useCallback(() => {
         if (!markdownContent) {
             alert('Error: Form content is missing. Please refresh the page and try again.');
             return;
         }
-        
-        // Use the ref for stable access to current answers state
-        const currentAnswers = answersRef.current;
         
         try {
             let output = `# AI Project Requirements - My Answers\n\n`;
@@ -395,38 +358,34 @@ const AiFormPage = () => {
                 const isAnswerLine = currentQuestionContextId && (trimmedLine.toLowerCase().startsWith('*   your answer') || trimmedLine.toLowerCase().startsWith('* your answer'));
                 const checkboxMatch = currentQuestionContextId && trimmedLine.match(/^\s*\*\s*\[( |x)\]\s*(.*)/i);
 
-                if (questionIdMatch) {
-                    currentQuestionContextId = questionIdMatch[1];
-                    output += `${line}\n`;
-                } else if (isAnswerLine) {
-                    output += `${line}\n`;
-                    output += `        \`\`\`text\n${currentAnswers[currentQuestionContextId] || 'No answer provided.'}\n        \`\`\`\n\n`;
-                } else if (checkboxMatch) {
-                    const labelText = checkboxMatch[2];
-                    const checkboxId = `checkbox-${currentQuestionContextId}-${labelText.trim().toLowerCase().replace(/\W+/g, '-')}`;
-                    const isChecked = !!currentAnswers[checkboxId];
-                    output += `    *   [${isChecked ? 'x' : ' '}] ${labelText}\n`;
-                } else {
-                    output += `${line}\n`;
-                }
-            });
-
-            const blob = new Blob([output], { type: 'text/markdown;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'AI_Project_Filled_Form.md';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
+            if (questionIdMatch) {
+                currentQuestionContextId = questionIdMatch[1];
+                output += `${line}\n`;
+            } else if (isAnswerLine) {
+                output += `${line}\n`;
+                output += `        \`\`\`text\n${answers[currentQuestionContextId] || 'No answer provided.'}\n        \`\`\`\n\n`;
+            } else if (checkboxMatch) {
+                const labelText = checkboxMatch[2];
+                const checkboxId = `checkbox-${currentQuestionContextId}-${labelText.trim().toLowerCase().replace(/\W+/g, '-')}`;
+                const isChecked = !!answers[checkboxId];
+                output += `    *   [${isChecked ? 'x' : ' '}] ${labelText}\n`;
+            } else {
+                output += `${line}\n`;
+            }
+        });        const blob = new Blob([output], { type: 'text/markdown;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'AI_Project_Filled_Form.md';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
         } catch (error) {
             console.error("Failed to download answers:", error);
             alert('There was an error downloading your answers. Please try again.');
         }
-    };
-
-    const copyPromptToClipboard = async () => {
+    }, [markdownContent, answers]);    const copyPromptToClipboard = useCallback(async () => {
         const prompt = `I want to create a coding project and I've filled out a requirements form. Please analyze my answers and help me plan and build this project step by step.
 
 Please review my form responses and:
@@ -469,66 +428,53 @@ Here is my completed requirements form: [Please paste or attach your downloaded 
             console.error('Failed to copy to clipboard:', err);
             alert('Sorry, we couldn\'t copy to your clipboard. Please download the form and manually copy the text.');
         }
-    };
-
-    // Render the content based on current state
-    const renderContent = () => {
-        if (isLoading) {
-            return (
-                <div className="loading-container">
-                    <div className="loading-indicator">
-                        <div className="spinner"></div>
-                        <p>Loading AI Project Requirements Form...</p>
-                    </div>
-                </div>
-            );
-        }
-
-        if (error) {
-            return (
-                <div className="error-container">
-                    <div className="error-message">
-                        <h3>Error Loading Form</h3>
-                        <p>{error}</p>
-                        <button 
-                            onClick={() => window.location.reload()} 
-                            className="action-button"
-                        >
-                            Try Again
-                        </button>
-                    </div>
-                </div>
-            );
-        }
-
-        // Main form content
+    }, []);    if (isLoading) {
         return (
-            <>
-                {renderFormElements()}
-                <hr />
-                <div className="form-actions-section">
-                    <h3>Actions</h3>
-                    <button onClick={handleDownloadAnswers} className="action-button download-button">
-                        Download Completed Form (Markdown)
-                    </button>
-                    <p style={{fontSize: '0.9em', marginTop: '5px'}}>
-                        <em>Download your answers in a Markdown file to share with an AI.</em>
-                    </p>
-                    <button onClick={copyPromptToClipboard} className="action-button copy-prompt-button" style={{marginTop: '15px'}}>
-                        Copy Suggested AI Prompt
-                    </button>
-                    <p style={{fontSize: '0.9em', marginTop: '5px'}}>
-                        <em>Copies a template prompt for when you submit your form to an AI. Remember to attach/paste your downloaded form.</em>
-                    </p>
+            <div className="loading-container">
+                <div className="loading-indicator">
+                    <div className="spinner"></div>
+                    <p>Loading AI Project Requirements Form...</p>
                 </div>
-            </>
+            </div>
         );
-    };
+    }
+
+    if (error) {
+        return (
+            <div className="error-container">
+                <div className="error-message">
+                    <h3>Error Loading Form</h3>
+                    <p>{error}</p>
+                    <button 
+                        onClick={() => window.location.reload()} 
+                        className="action-button"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        );    }
 
     console.log("Rendering AiFormPage, answers:", answers);
     return (
         <div className="ai-form-page-container content-container" style={{ overflowY: "auto", height: "calc(100vh - 120px)" }}>
-            {renderContent()}
+            {renderFormElements()}
+            <hr />
+            <div className="form-actions-section">
+                <h3>Actions</h3>
+                <button onClick={handleDownloadAnswers} className="action-button download-button">
+                    Download Completed Form (Markdown)
+                </button>
+                <p style={{fontSize: '0.9em', marginTop: '5px'}}>
+                    <em>Download your answers in a Markdown file to share with an AI.</em>
+                </p>
+                <button onClick={copyPromptToClipboard} className="action-button copy-prompt-button" style={{marginTop: '15px'}}>
+                    Copy Suggested AI Prompt
+                </button>
+                <p style={{fontSize: '0.9em', marginTop: '5px'}}>
+                    <em>Copies a template prompt for when you submit your form to an AI. Remember to attach/paste your downloaded form.</em>
+                </p>
+            </div>
         </div>
     );
 };

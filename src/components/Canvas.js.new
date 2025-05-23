@@ -62,11 +62,8 @@ class Canvas extends React.Component {
         layerCanvas.width = this.canvas.width;
         layerCanvas.height = this.canvas.height;
         
-        // Generate a truly unique ID using timestamp and random string
-        const uniqueId = `layer-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-        
         const newLayer = {
-            id: uniqueId,
+            id: `layer-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             name: `Layer ${this.state.layers.length + 1}`,
             canvas: layerCanvas,
             visible: true
@@ -452,38 +449,29 @@ class Canvas extends React.Component {
                 // Make sure we have a valid dataURL - if not, generate one from the frame's layers
                 let frameDataURL = frame.dataURL;
                 if (!frameDataURL && frame.layers && frame.layers.length > 0) {
-                    try {
-                        // Create a temporary canvas to combine the layers
-                        const tempCanvas = document.createElement('canvas');
-                        tempCanvas.width = this.canvas.width;
-                        tempCanvas.height = this.canvas.height;
-                        const tempCtx = tempCanvas.getContext('2d');
-                        
-                        // Draw all visible layers to this temp canvas
-                        frame.layers.forEach(layer => {
-                            if (layer.visible && layer.canvas) {
-                                try {
-                                    tempCtx.drawImage(layer.canvas, 0, 0);
-                                } catch (error) {
-                                    console.error("Error drawing layer to preview canvas:", error);
-                                }
+                    // Create a temporary canvas to combine the layers
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = this.canvas.width;
+                    tempCanvas.height = this.canvas.height;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    // Draw all visible layers to this temp canvas
+                    frame.layers.forEach(layer => {
+                        if (layer.visible && layer.canvas) {
+                            try {
+                                tempCtx.drawImage(layer.canvas, 0, 0);
+                            } catch(error) {
+                                console.error("Error drawing layer to preview canvas:", error);
                             }
-                        });
-                        
-                        frameDataURL = tempCanvas.toDataURL('image/png');
-                    } catch (error) {
-                        console.error("Error generating frame dataURL:", error);
-                        // Use a fallback empty canvas if we can't generate the dataURL
-                        const fallbackCanvas = document.createElement('canvas');
-                        fallbackCanvas.width = this.canvas.width;
-                        fallbackCanvas.height = this.canvas.height;
-                        frameDataURL = fallbackCanvas.toDataURL('image/png');
-                    }
+                        }
+                    });
+                    
+                    frameDataURL = tempCanvas.toDataURL('image/png');
                 }
                 
                 // Convert each frame to a renderable format
                 return {
-                    id: frame.id || `frame-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                    id: frame.id || Math.random(),
                     duration: 100, // Default frame duration
                     dataURL: frameDataURL // Use the stored dataURL or generated one
                 };
@@ -491,11 +479,7 @@ class Canvas extends React.Component {
             
             // Only update if we have valid frames
             if (exportedFrames.length > 0) {
-                try {
-                    this.props.onFramesUpdated(exportedFrames);
-                } catch (error) {
-                    console.error("Error updating frames:", error);
-                }
+                this.props.onFramesUpdated(exportedFrames);
             }
         }
     }
@@ -518,17 +502,21 @@ class Canvas extends React.Component {
                 // Copy the current layer content to the new canvas
                 const newLayerCtx = newLayerCanvas.getContext('2d');
                 if (layer.canvas) {
-                    newLayerCtx.drawImage(layer.canvas, 0, 0);
+                    try {
+                        newLayerCtx.drawImage(layer.canvas, 0, 0);
+                    } catch(error) {
+                        console.error("Error copying layer canvas:", error);
+                    }
                 }
                 
                 return {
                     ...layer,
                     canvas: newLayerCanvas,
-                    id: `layer-${Date.now()}-${Math.random().toString(36).substring(2, 9)}` // Ensure unique ID
+                    id: `layer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` // Ensure unique ID
                 };
             }),
             activeLayer: this.state.activeLayer,
-            id: `frame-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`, // Add unique ID for the frame
+            id: `frame-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // Add unique ID for the frame
             dataURL: this.canvasToDataURL() // Capture current canvas state
         };
         
@@ -599,8 +587,7 @@ class Canvas extends React.Component {
         const currentFrameData = {
             layers: layersCopy,
             activeLayer: this.state.activeLayer,
-            id: this.state.frames[this.state.currentFrameIndex]?.id || 
-                `frame-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            id: this.state.frames[this.state.currentFrameIndex]?.id || `frame-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
             dataURL: this.canvasToDataURL() // Capture current canvas state
         };
         
@@ -650,24 +637,16 @@ class Canvas extends React.Component {
                 if (layer.canvas) {
                     const newLayerCtx = newLayerCanvas.getContext('2d');
                     try {
-                        // Make sure the source canvas is valid before drawing
-                        if (layer.canvas.width > 0 && layer.canvas.height > 0) {
-                            newLayerCtx.drawImage(layer.canvas, 0, 0);
-                        } else {
-                            console.warn("Invalid source canvas dimensions in layer", layer.id);
-                        }
+                        newLayerCtx.drawImage(layer.canvas, 0, 0);
                     } catch (error) {
                         console.error("Error copying layer to new canvas:", error);
                     }
                 }
                 
-                // Generate a truly unique ID for the layer with timestamp and random component
-                const uniqueLayerId = `layer-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-                
                 return {
                     ...layer,
                     canvas: newLayerCanvas,
-                    id: uniqueLayerId
+                    id: `layer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
                 };
             });
             
@@ -692,16 +671,15 @@ class Canvas extends React.Component {
             const dataURL = previewCanvas.toDataURL('image/png');
             console.log("Generated dataURL for new frame");
             
-            // Step 3: Create the new frame object with a unique ID
-            const uniqueFrameId = `frame-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+            // Step 3: Create the new frame object
             const newFrame = {
-                id: uniqueFrameId,
+                id: `frame-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                 layers: duplicatedLayers,
                 activeLayer: frameToClone.activeLayer,
                 dataURL: dataURL
             };
             
-            console.log("Created new frame with ID:", uniqueFrameId);
+            console.log("Created new frame object");
             
             // Step 4: Update the state with the new frame
             this.setState(prevState => {

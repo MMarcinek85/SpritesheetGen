@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import '../styles/main.css';
 
 // Helper to format a line of Markdown text, potentially containing inline styles.
@@ -79,7 +79,7 @@ const AiFormPage = () => {
         fetchMarkdown();
     }, []);
 
-    const handleInputChange = (id, value) => {
+    const handleInputChange = useCallback((id, value) => {
         console.log(`Updating answer for ${id}:`, value);
         setAnswers(prevAnswers => {
             const newAnswers = {
@@ -88,15 +88,14 @@ const AiFormPage = () => {
             };
             return newAnswers;
         });
-    };
+    }, []);
     
-    function renderFormElements() {
+    const renderFormElements = useCallback(() => {
         if (!markdownContent) return [];
 
         const lines = markdownContent.split('\n');
         const elements = [];
         let currentQuestionId = null;
-        let lastQuestionId = null; // Track the last seen question ID
         let inCheckboxList = false;
         let checkboxItems = [];
         let inUlList = false;
@@ -105,8 +104,8 @@ const AiFormPage = () => {
         let olItems = [];
         let currentListNumber = 1;
         
-        // Use the latest answers state directly
-        const currentAnswers = answers || {};
+        // Use the ref value for stable access to current answers
+        const currentAnswers = answersRef.current || {};
 
         const closeCheckboxList = () => {
             if (inCheckboxList && checkboxItems.length > 0) {
@@ -177,7 +176,6 @@ const AiFormPage = () => {
             if (questionIdMatch) {
                 closeAllLists();
                 currentQuestionId = questionIdMatch[1];
-                lastQuestionId = currentQuestionId; // Update last seen question ID
                 const questionTextHtml = formatLineAsHtml(line.replace(/^\s*\*\s*/, ''));
                 elements.push(
                     <div key={`question-${currentQuestionId}`} className="form-question-block"
@@ -187,47 +185,23 @@ const AiFormPage = () => {
             }
 
             // 3. "Your Answer" Line
-            if ((trimmedLine.toLowerCase().startsWith('*   your answer') || trimmedLine.toLowerCase().startsWith('* your answer'))) {
-                // Generate a field ID that is guaranteed to be unique (line index) but also maintains question association
-                // This ID will be used both as a React key and as the state key for this specific textarea
-                const fieldId = lastQuestionId ? `field-${lastQuestionId}-${index}` : `field-unknown-${index}`;
-                
-                if (!lastQuestionId) {
-                    console.warn(`No question ID found for answer at line ${index}. Using fallback ID: ${fieldId}`);
-                } else {
-                    console.log(`Creating answer field with ID: ${fieldId} for question ${lastQuestionId} at line ${index}`);
-                }
-                
+            if (currentQuestionId && (trimmedLine.toLowerCase().startsWith('*   your answer') || trimmedLine.toLowerCase().startsWith('* your answer'))) {
                 closeAllLists();
-                
+                const textareaKey = `answer-textarea-${currentQuestionId}`;
                 elements.push(
-                    <div key={`container-${fieldId}`} className="textarea-container">
+                    <div key={`answer-container-${currentQuestionId}`} className="textarea-container">
                         <textarea
-                            id={fieldId}
-                            key={fieldId}
+                            id={`answer-${currentQuestionId}`}
+                            key={textareaKey}
                             className="form-answer-textarea"
-                            // Use fieldId as the state key rather than lastQuestionId
-                            value={currentAnswers[fieldId] || ''}
+                            value={currentAnswers[currentQuestionId] || ''}
                             onChange={(e) => {
-                                const value = e.target.value;
-                                console.log(`Textarea change for fieldId=${fieldId} (question=${lastQuestionId}, line=${index}):`, value);
-                                handleInputChange(fieldId, value);
+                                console.log(`Textarea change for ${currentQuestionId}:`, e.target.value);
+                                handleInputChange(currentQuestionId, e.target.value);
                             }}
-                            onFocus={(e) => console.log(`Textarea focused: fieldId=${fieldId}, question=${lastQuestionId}, line=${index}`)}
+                            onFocus={(e) => console.log(`Textarea focused: ${currentQuestionId}`)}
                             placeholder="Type your answer here..."
                             rows={trimmedLine.toLowerCase().includes('(list)') ? 6 : 3}
-                            style={{
-                                // Direct inline styles to override any problematic CSS
-                                color: 'black',
-                                backgroundColor: 'white',
-                                border: '2px solid #3498db',
-                                padding: '10px',
-                                width: '100%',
-                                minHeight: '80px',
-                                zIndex: 1000,
-                                opacity: 1,
-                                position: 'relative'
-                            }}
                         />
                     </div>
                 );
@@ -371,9 +345,9 @@ const AiFormPage = () => {
 
         closeAllLists();
         return elements;
-    }
+    }, [markdownContent, handleInputChange]);
 
-    const handleDownloadAnswers = () => {
+    const handleDownloadAnswers = useCallback(() => {
         if (!markdownContent) {
             alert('Error: Form content is missing. Please refresh the page and try again.');
             return;
@@ -424,9 +398,9 @@ const AiFormPage = () => {
             console.error("Failed to download answers:", error);
             alert('There was an error downloading your answers. Please try again.');
         }
-    };
+    }, [markdownContent]);
 
-    const copyPromptToClipboard = async () => {
+    const copyPromptToClipboard = useCallback(async () => {
         const prompt = `I want to create a coding project and I've filled out a requirements form. Please analyze my answers and help me plan and build this project step by step.
 
 Please review my form responses and:
@@ -469,7 +443,7 @@ Here is my completed requirements form: [Please paste or attach your downloaded 
             console.error('Failed to copy to clipboard:', err);
             alert('Sorry, we couldn\'t copy to your clipboard. Please download the form and manually copy the text.');
         }
-    };
+    }, []);
 
     // Render the content based on current state
     const renderContent = () => {
