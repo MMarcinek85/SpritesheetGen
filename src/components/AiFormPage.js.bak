@@ -168,12 +168,6 @@ const AiFormPage = () => {
         lines.forEach((line, index) => {
             const trimmedLine = line.trim();
 
-            // Debugging for Section 6
-            const isSection6Debug = (currentQuestionId && currentQuestionId.startsWith("6.")) || (lastQuestionId && lastQuestionId.startsWith("6."));
-            if (isSection6Debug) {
-                console.log(`[S6 DEBUG] Line ${index + 1}: "${trimmedLine}" | currentQ: ${currentQuestionId} | lastQ: ${lastQuestionId}`);
-            }
-
             // Skip empty lines but don't close lists (allows for spacing in lists)
             if (trimmedLine === '') {
                 if (!inCheckboxList && !inUlList && !inOlList) {
@@ -205,11 +199,9 @@ const AiFormPage = () => {
 
             // 3. "Your Answer" Line
             if ((trimmedLine.toLowerCase().startsWith('*   your answer') || trimmedLine.toLowerCase().startsWith('* your answer'))) {
+                // Generate a field ID that is guaranteed to be unique (line index) but also maintains question association
+                // This ID will be used both as a React key and as the state key for this specific textarea
                 const fieldId = lastQuestionId ? `field-${lastQuestionId}-${index}` : `field-unknown-${index}`;
-                
-                if (isSection6Debug) {
-                    console.log(`[S6 DEBUG] Matched "Your Answer" for line ${index + 1}. lastQ: ${lastQuestionId}, fieldId: ${fieldId}`);
-                }
                 
                 if (!lastQuestionId) {
                     console.warn(`No question ID found for answer at line ${index}. Using fallback ID: ${fieldId}`);
@@ -256,27 +248,26 @@ const AiFormPage = () => {
             // 4. Checkbox Line
             const checkboxMatch = currentQuestionId && trimmedLine.match(/^\s*\*\s*\[( |x)\]\s*(.*)/i);
             if (checkboxMatch) {
+                // Close other list types if open
                 closeUlList();
                 closeOlList();
                 
-                // Moved labelText and isOtherOption definitions up for early access in debug log
-                const currentLabelText = checkboxMatch[2]; 
-                const currentIsOtherOption = currentLabelText.toLowerCase().includes('other') || 
-                                             currentLabelText.toLowerCase().includes('please describe');
-
-                if (isSection6Debug) {
-                    console.log(`[S6 DEBUG] Matched Checkbox for line ${index + 1}. currentQ: ${currentQuestionId}, label: "${currentLabelText}"`);
-                    if (currentIsOtherOption) {
-                        const checkboxId = `checkbox-${currentQuestionId}-${currentLabelText.trim().toLowerCase().replace(/\W+/g, '-')}`;
-                        console.log(`[S6 DEBUG] Checkbox is "Other" type. checkboxId: ${checkboxId}`);
-                    }
-                }
+                // Special handling for section 8.3 which had key duplicates
+                const isSection83 = currentQuestionId === "8.3";
                 
                 if (!inCheckboxList) {
                     inCheckboxList = true;
+                    // If we're starting a new checkbox list for section 8.3, reset any previous items
+                    if (isSection83) {
+                        checkboxItems = [];
+                    }
                 }
 
-                const checkboxId = `checkbox-${currentQuestionId}-${currentLabelText.trim().toLowerCase().replace(/\W+/g, '-')}`;
+                const labelText = checkboxMatch[2];
+                const isOtherOption = labelText.toLowerCase().includes('other') || 
+                                    labelText.toLowerCase().includes('please describe');
+                // Create a more unique ID based on the question ID, label and index
+                const checkboxId = `checkbox-${currentQuestionId}-${labelText.trim().toLowerCase().replace(/\W+/g, '-')}`;
                 const uniqueKey = `${checkboxId}-${index}`;
                 
                 const item = (
@@ -290,12 +281,33 @@ const AiFormPage = () => {
                                     console.log(`Checkbox change for ${checkboxId}:`, e.target.checked);
                                     handleInputChange(checkboxId, e.target.checked);
                                     
-                                    if (!e.target.checked && currentIsOtherOption) { // Use currentIsOtherOption
+                                    // If this is unchecked and has an "other" field, clear the other text value
+                                    if (!e.target.checked && isOtherOption) {
                                         handleInputChange(`${checkboxId}-text`, '');
                                     }
                                 }}
                             />
-                            <label htmlFor={checkboxId} dangerouslySetInnerHTML={{ __html: formatLineAsHtml(currentLabelText, true) }} /> {/* Use currentLabelText */}
+                            <label htmlFor={checkboxId} dangerouslySetInnerHTML={{ __html: formatLineAsHtml(labelText, true) }} />
+                            
+                            {isOtherOption && (
+                                <input
+                                    type="text"
+                                    className="other-option-input"
+                                    placeholder="Please specify..."
+                                    value={currentAnswers[`${checkboxId}-text`] || ''}
+                                    onChange={(e) => {
+                                        console.log(`Other text change for ${checkboxId}-text:`, e.target.value);
+                                        handleInputChange(`${checkboxId}-text`, e.target.value);
+                                    }}
+                                    onFocus={(e) => {
+                                        // Ensure the checkbox is checked when focusing on the "other" field
+                                        if (!currentAnswers[checkboxId]) {
+                                            handleInputChange(checkboxId, true);
+                                        }
+                                    }}
+                                    disabled={!currentAnswers[checkboxId]}
+                                />
+                            )}
                         </div>
                     </li>
                 );

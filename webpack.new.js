@@ -27,14 +27,17 @@ module.exports = {
         use: ['style-loader', 'css-loader']
       }
     ]
-  },
-  plugins: [
+  },  plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html'
     }),
     new CopyPlugin({
       patterns: [
-        { from: 'public', to: '' }
+        { 
+          from: 'public', 
+          to: '',
+          force: true
+        }
       ]
     })
   ],
