@@ -518,36 +518,77 @@ body {
     cursor: not-allowed;
 }
 
-/* Styles for the AI Form Page */
+/* Styles for the AI Form Page - Interactive Version */
 .ai-form-page-container {
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: #fdfdfd; /* Slightly off-white */
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     margin: 20px auto;
-    max-width: 900px; /* Adjust as needed */
-    line-height: 1.6;
+    max-width: 900px;
+    line-height: 1.7;
+}
+
+.form-question-block {
+    margin-bottom: 0.5em; /* Space below the question text */
+}
+
+.form-question-block p strong, 
+.form-question-block h1, 
+.form-question-block h2, 
+.form-question-block h3 {
+    color: #2c3e50; /* Darker, more professional blue/grey */
+}
+
+.form-answer-textarea {
+    width: calc(100% - 20px); /* Full width minus padding */
+    padding: 10px;
+    margin-top: 5px; /* Space above textarea */
+    margin-bottom: 20px; /* Space below textarea */
+    border: 1px solid #bdc3c7; /* Softer grey border */
+    border-radius: 4px;
+    font-family: inherit; /* Use the same font as the page */
+    font-size: 0.95em;
+    line-height: 1.5;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-answer-textarea:focus {
+    border-color: #3498db; /* Blue border on focus */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06), 0 0 5px rgba(52, 152, 219, 0.5);
+    outline: none;
+}
+
+.form-list {
+    margin-left: 20px;
+    padding-left: 20px; /* Indent list items */
+    list-style-position: outside;
+}
+
+.form-list li {
+    margin-bottom: 0.5em;
 }
 
 .ai-form-page-container h1 {
     color: #333;
     border-bottom: 2px solid #eee;
     padding-bottom: 10px;
-    margin-top: 1.5em; /* Add space above h1 */
+    margin-top: 1em; /* Reduced top margin for first h1 */
     margin-bottom: 0.8em;
 }
 
 .ai-form-page-container h2 {
     color: #555;
-    margin-top: 1.5em;
+    margin-top: 1.8em; /* More space above h2 */
     margin-bottom: 0.6em;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 8px;
 }
 
 .ai-form-page-container h3 {
     color: #666;
-    margin-top: 1.2em;
+    margin-top: 1.5em;
     margin-bottom: 0.5em;
 }
 
@@ -564,34 +605,27 @@ body {
     font-style: italic;
 }
 
-.ai-form-page-container ul, .ai-form-page-container ol {
-    margin-left: 20px;
-    margin-bottom: 1em;
-}
-
-.ai-form-page-container li {
-    margin-bottom: 0.5em;
-}
-
 .ai-form-page-container code {
-    background-color: #eee;
-    padding: 2px 5px;
+    background-color: #f0f0f0; /* Lighter grey for inline code */
+    padding: 3px 6px;
     border-radius: 4px;
     font-family: monospace;
+    font-size: 0.9em;
 }
 
 .ai-form-page-container pre code {
     display: block;
-    padding: 10px;
-    white-space: pre-wrap; /* Allow wrapping */
-    word-wrap: break-word; /* Break long words */
-    background-color: #2d2d2d; /* Darker background for code blocks */
-    color: #f0f0f0; /* Lighter text for code blocks */
+    padding: 12px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: #2d2d2d;
+    color: #f0f0f0;
     border-radius: 4px;
+    margin: 1em 0;
 }
 
 .ai-form-page-container a {
-    color: #007bff;
+    color: #3498db; /* Consistent blue for links */
     text-decoration: none;
 }
 
@@ -601,36 +635,71 @@ body {
 
 .ai-form-page-container hr {
     border: 0;
-    border-top: 1px solid #ddd;
-    margin: 2em 0;
+    border-top: 1px solid #e0e0e0; /* Slightly more visible hr */
+    margin: 2.5em 0;
 }
 
-.ai-form-view {
-    display: flex; /* Allow content to take full width if needed */
-    justify-content: center; /* Center the form container */
-}
-
-.content-container {
-    /* General container for content that might be shared */
-    background-color: #fff; /* Or a light neutral */
+/* Style for the suggested prompt blockquote */
+.ai-prompt-suggestion {
+    background-color: #e9f5ff;
+    border-left: 5px solid #3498db;
     padding: 15px;
-    border-radius: 5px;
-    /* box-shadow: 0 1px 3px rgba(0,0,0,0.1); */ /* Optional subtle shadow */
-}
-
-/* Ensure loading and error messages are visible */
-.loading-indicator, .error-message {
-    text-align: center;
-    padding: 20px;
-    font-size: 1.2em;
-    color: #555;
-}
-
-.error-message {
-    color: #D8000C; /* Error red */
-    background-color: #FFD2D2; /* Light red background */
-    border: 1px solid #D8000C;
+    margin: 1.5em 0;
+    font-style: italic;
+    color: #2c3e50;
     border-radius: 4px;
+}
+
+.form-actions-section {
+    margin-top: 2.5em;
+    padding: 20px;
+    background-color: #f7f9fa; /* Very light grey background */
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+.form-actions-section h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.action-button {
+    background-color: #3498db; /* Primary blue */
+    color: white;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    margin: 5px;
+}
+
+.action-button:hover {
+    background-color: #2980b9; /* Darker blue on hover */
+}
+
+.action-button:active {
+    transform: translateY(1px);
+}
+
+.download-button {
+    background-color: #2ecc71; /* Green for download */
+}
+
+.download-button:hover {
+    background-color: #27ae60; /* Darker green */
+}
+
+.copy-prompt-button {
+    background-color: #f39c12; /* Orange for copy prompt */
+}
+
+.copy-prompt-button:hover {
+    background-color: #e67e22; /* Darker orange */
 }
 
 /* Responsive Design */
@@ -655,4 +724,69 @@ body {
         flex-direction: column;
         gap: 0.5rem;
     }
+}
+
+/* Loading Spinner */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+    width: 100%;
+}
+
+.loading-indicator {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 15px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error Message Styling */
+.error-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70vh;
+    width: 100%;
+}
+
+.error-message {
+    text-align: center;
+    padding: 25px;
+    border-radius: 8px;
+    background-color: #fff3f3;
+    border: 1px solid #ffd7d7;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+}
+
+.error-container .error-message {
+    background-color: #fff3f3;
+    border: 1px solid #ffd7d7;
+}
+
+.error-container .error-message h3 {
+    color: var(--accent-color);
+    margin-bottom: 15px;
+}
+
+.error-container .error-message p {
+    margin-bottom: 20px;
 }

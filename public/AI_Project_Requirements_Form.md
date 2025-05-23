@@ -161,3 +161,19 @@ This form is designed to help you think through your project idea and gather all
 ---
 
 **Thank you for your detailed input!** This information will be incredibly helpful for an AI to assist you effectively. The next step is to process this information to create a tailored development roadmap and actionable next steps for your project.
+
+---
+
+## 9. Next Steps: Using This Form with an AI
+
+Once you've filled out this form, you're ready to share it with an AI assistant! Here's a suggested prompt you can use. The button below the form on this webpage will help you copy it.
+
+**Suggested Prompt to Use with an AI:**
+
+> Hi! I've used the 'AI Project Requirements & Design Assistant Form' to detail my project idea. The completed form is [attached/pasted below].
+>
+> Please review it carefully. I'm particularly interested in the outputs I've selected in Section 8.3 ('What do you want the AI to help you generate first?'). Could you please generate those for me, using all the information I've provided in the form as context?
+>
+> If anything in the form is unclear, or if you need more details to best address my requests from Section 8.3, please feel free to ask. I'm excited to see how you can help me kickstart this project!
+
+Remember to replace `[attached/pasted below]` with your actual filled-out form content (which you'll need to copy manually from the text you've entered into a saved version of this form) when you use this prompt.
