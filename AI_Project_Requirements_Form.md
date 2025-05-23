@@ -33,17 +33,11 @@ This form is designed to help you think through your project idea and gather all
 
 *   **2.1. Must-Have Features:** (List the absolute essential things your project *must* do. If it doesn't do these, it's not the project you envisioned.)
     *   Example: "User login/logout," "Display a map with interactive points," "Allow users to upload images," "Calculate sales tax."
-    *   Your Answer (list):
-        *
-        *
-        *
+    *   Your Answer:
 
 *   **2.2. Nice-to-Have Features:** (What cool additions would make it even better, but aren't critical for the first version?)
     *   Example: "Dark mode," "Social media sharing," "Gamification elements (points, badges)," "Advanced search filters."
-    *   Your Answer (list):
-        *
-        *
-        *
+    *   Your Answer:
 
 *   **2.3. User Journey Example (User Flow):** (Describe a typical step-by-step interaction a user would have with your project.)
     *   Example for a recipe app:
@@ -109,17 +103,17 @@ This form is designed to help you think through your project idea and gather all
 
 ## 6. Platform & Technology
 
-*   **6.1. Target Platform(s):** (Where will users access your project?)
-    *   [ ] Web browser (Website / Web App)
-    *   [ ] Mobile App (Specify: [ ] iOS/iPhone, [ ] Android, [ ] Both)
-    *   [ ] Desktop App (Specify: [ ] Windows, [ ] macOS, [ ] Linux)
-    *   [ ] Other (Please describe):
+**6.1. Target Platform(s):** (Where will users access your project?)
+[ ] Web browser (Website / Web App)
+[ ] Mobile App (Specify: [ ] iOS/iPhone, [ ] Android, [ ] Both)
+[ ] Desktop App (Specify: [ ] Windows, [ ] macOS, [ ] Linux)
+[ ] Other (Please describe):
 
-*   **6.2. Technology Preferences (Optional):** (Do you have any specific programming languages, frameworks, or tools in mind? It's okay if not!)
-    *   Your Answer:
+**6.2. Technology Preferences (Optional):** (Do you have any specific programming languages, frameworks, or tools in mind? It's okay if not!)
+Your Answer:
 
-*   **6.3. Existing Systems/Integrations:** (Does this project need to connect with any other software or services you already use?)
-    *   Your Answer:
+**6.3. Existing Systems/Integrations:** (Does this project need to connect with any other software or services you already use?)
+Your Answer:
 
 ---
 

@@ -1,0 +1,5 @@
+{
+    "version": "0.1.0",
+    "url": "http://localhost:8080",
+    "webRoot": "${workspaceFolder}/src"
+}
