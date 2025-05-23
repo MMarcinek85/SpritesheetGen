@@ -13,6 +13,30 @@ export function applyTemplate(template, context, isUnderlay = true) {
     // Default to first frame for drawing template
     const frame = template.frames[0];
     
+    // Calculate scaling factor (make template 3x larger)
+    const scaleFactor = 3.0;
+    
+    // Get canvas dimensions
+    const canvasWidth = context.canvas.width;
+    const canvasHeight = context.canvas.height;
+    
+    // Calculate template bounds
+    let minX = Infinity, minY = Infinity, maxX = 0, maxY = 0;
+    Object.values(frame.parts).forEach(part => {
+        minX = Math.min(minX, part.position.x);
+        minY = Math.min(minY, part.position.y);
+        maxX = Math.max(maxX, part.position.x + part.size.width);
+        maxY = Math.max(maxY, part.position.y + part.size.height);
+    });
+    
+    // Calculate template width and height
+    const templateWidth = maxX - minX;
+    const templateHeight = maxY - minY;
+    
+    // Calculate translation to center the template
+    const translateX = (canvasWidth - templateWidth * scaleFactor) / 2 - minX * scaleFactor;
+    const translateY = (canvasHeight - templateHeight * scaleFactor) / 2 - minY * scaleFactor;
+    
     // Set rendering styles based on whether it's an underlay or overlay
     if (isUnderlay) {
         context.globalAlpha = 0.2; // Faded for underlays
@@ -24,6 +48,13 @@ export function applyTemplate(template, context, isUnderlay = true) {
         context.lineWidth = 1;
         context.setLineDash([3, 3]); // Dashed lines for overlays
     }
+    
+    // Save context state before transformations
+    context.save();
+    
+    // Apply transformations for centering and scaling
+    context.translate(translateX, translateY);
+    context.scale(scaleFactor, scaleFactor);
     
     // Draw each template part
     Object.entries(frame.parts).forEach(([partName, part]) => {
@@ -51,6 +82,9 @@ export function applyTemplate(template, context, isUnderlay = true) {
             part.position.y + part.size.height / 2
         );
     });
+    
+    // Restore context state to undo transformations
+    context.restore();
     
     // Reset context properties
     context.globalAlpha = 1.0;
