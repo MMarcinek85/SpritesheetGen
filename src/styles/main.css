@@ -32,10 +32,42 @@ body {
 }
 
 .header {
-    background-color: var(--primary-color);
+    background-color: #333;
     color: white;
     padding: 1rem;
     text-align: center;
+    border-bottom: 2px solid #555;
+}
+
+.header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+}
+
+.main-nav {
+    margin-top: 0.5rem;
+}
+
+.main-nav button {
+    background-color: #555;
+    color: white;
+    border: 1px solid #777;
+    padding: 0.5rem 1rem;
+    margin: 0 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.main-nav button:hover {
+    background-color: #777;
+}
+
+.main-nav button:disabled {
+    background-color: #4CAF50; /* Green to show active */
+    color: white;
+    cursor: default;
+    border-color: #4CAF50;
 }
 
 .main-content {
@@ -484,6 +516,121 @@ body {
 .export-button:disabled {
     background-color: var(--border-color);
     cursor: not-allowed;
+}
+
+/* Styles for the AI Form Page */
+.ai-form-page-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 20px auto;
+    max-width: 900px; /* Adjust as needed */
+    line-height: 1.6;
+}
+
+.ai-form-page-container h1 {
+    color: #333;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 1.5em; /* Add space above h1 */
+    margin-bottom: 0.8em;
+}
+
+.ai-form-page-container h2 {
+    color: #555;
+    margin-top: 1.5em;
+    margin-bottom: 0.6em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.ai-form-page-container h3 {
+    color: #666;
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+}
+
+.ai-form-page-container p {
+    margin-bottom: 1em;
+}
+
+.ai-form-page-container strong {
+    color: #444;
+}
+
+.ai-form-page-container em {
+    color: #555;
+    font-style: italic;
+}
+
+.ai-form-page-container ul, .ai-form-page-container ol {
+    margin-left: 20px;
+    margin-bottom: 1em;
+}
+
+.ai-form-page-container li {
+    margin-bottom: 0.5em;
+}
+
+.ai-form-page-container code {
+    background-color: #eee;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.ai-form-page-container pre code {
+    display: block;
+    padding: 10px;
+    white-space: pre-wrap; /* Allow wrapping */
+    word-wrap: break-word; /* Break long words */
+    background-color: #2d2d2d; /* Darker background for code blocks */
+    color: #f0f0f0; /* Lighter text for code blocks */
+    border-radius: 4px;
+}
+
+.ai-form-page-container a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.ai-form-page-container a:hover {
+    text-decoration: underline;
+}
+
+.ai-form-page-container hr {
+    border: 0;
+    border-top: 1px solid #ddd;
+    margin: 2em 0;
+}
+
+.ai-form-view {
+    display: flex; /* Allow content to take full width if needed */
+    justify-content: center; /* Center the form container */
+}
+
+.content-container {
+    /* General container for content that might be shared */
+    background-color: #fff; /* Or a light neutral */
+    padding: 15px;
+    border-radius: 5px;
+    /* box-shadow: 0 1px 3px rgba(0,0,0,0.1); */ /* Optional subtle shadow */
+}
+
+/* Ensure loading and error messages are visible */
+.loading-indicator, .error-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.2em;
+    color: #555;
+}
+
+.error-message {
+    color: #D8000C; /* Error red */
+    background-color: #FFD2D2; /* Light red background */
+    border: 1px solid #D8000C;
+    border-radius: 4px;
 }
 
 /* Responsive Design */

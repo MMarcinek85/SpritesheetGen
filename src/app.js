@@ -5,6 +5,7 @@ import ToolPanel from './components/ToolPanel';
 import AnimationPreview from './components/AnimationPreview';
 import TemplateSelector from './components/TemplateSelector';
 import SpritesheetExporter from './components/SpritesheetExporter';
+import AiFormPage from './components/AiFormPage'; // Import the new component
 import { generateAnimationFrames } from './templates/templateUtils';
 import './styles/main.css';
 
@@ -15,7 +16,8 @@ class App extends Component {
             selectedTemplate: null,
             spriteParts: {}, // User-drawn sprite parts
             generatedFrames: [], // Generated animation frames
-            isGenerating: false
+            isGenerating: false,
+            currentView: 'spritesheet', // 'spritesheet' or 'aiForm'
         };
         
         this.canvasRef = React.createRef();
@@ -72,99 +74,118 @@ class App extends Component {
             });
         }, 500); // Short timeout to show loading state
     };
+
+    setView = (view) => {
+        this.setState({ currentView: view });
+    };
     
     render() {
-        const { selectedTemplate, generatedFrames, isGenerating } = this.state;
+        const { selectedTemplate, generatedFrames, isGenerating, currentView } = this.state;
         
         return (
             <div className="app-container">
                 <header className="header">
-                    <h1>Spritesheet Generator for Godot</h1>
+                    <h1>Spritesheet Generator & AI Project Assistant</h1>
+                    <nav className="main-nav">
+                        <button onClick={() => this.setView('spritesheet')} disabled={currentView === 'spritesheet'}>
+                            Spritesheet Generator
+                        </button>
+                        <button onClick={() => this.setView('aiForm')} disabled={currentView === 'aiForm'}>
+                            AI Project Form
+                        </button>
+                    </nav>
                 </header>
                 
-                <main className="main-content">
-                    <div className="sidebar">
-                        <ToolPanel 
-                            onToolChange={(tool) => {
-                                if (this.canvasRef.current) {
-                                    this.canvasRef.current.changeTool(tool);
-                                }
-                            }}
-                            onColorChange={(color) => {
-                                if (this.canvasRef.current) {
-                                    this.canvasRef.current.changeColor(color);
-                                }
-                            }}
-                            onBrushSizeChange={(size) => {
-                                if (this.canvasRef.current) {
-                                    this.canvasRef.current.changeBrushSize(size);
-                                }
-                            }}
-                            onClear={() => {
-                                if (this.canvasRef.current) {
-                                    this.canvasRef.current.clear();
-                                }
-                            }}
-                            onAddLayer={() => {
-                                if (this.canvasRef.current) {
-                                    this.canvasRef.current.addNewLayer();
-                                }
-                            }}
-                            onSelectLayer={(index) => {
-                                if (this.canvasRef.current) {
-                                    this.canvasRef.current.changeActiveLayer(index);
-                                }
-                            }}
-                            onToggleLayerVisibility={(index) => {
-                                if (this.canvasRef.current) {
-                                    this.canvasRef.current.toggleLayerVisibility(index);
-                                }
-                            }}
-                            onDeleteLayer={(index) => {
-                                if (this.canvasRef.current) {
-                                    this.canvasRef.current.deleteLayer(index);
-                                }
-                            }}
-                            // Pass layers from canvas component when available
-                            layers={this.canvasRef.current?.state?.layers || []}
-                            activeLayer={this.canvasRef.current?.state?.activeLayer || 0}
-                        />
-                        
-                        <TemplateSelector onTemplateSelected={this.handleTemplateSelected} />
-                        
-                        <div className="generate-section">
-                            <button 
-                                className="generate-button action-button"
-                                onClick={this.captureSpriteParts}
-                                disabled={!selectedTemplate || isGenerating}
-                            >
-                                {isGenerating ? 'Generating...' : 'Generate Animation Frames'}
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div className="content-area">
-                        <div className="canvas-section">
-                            <Canvas 
-                                ref={this.canvasRef}
-                                template={selectedTemplate}
+                {currentView === 'spritesheet' && (
+                    <main className="main-content">
+                        <div className="sidebar">
+                            <ToolPanel 
+                                onToolChange={(tool) => {
+                                    if (this.canvasRef.current) {
+                                        this.canvasRef.current.changeTool(tool);
+                                    }
+                                }}
+                                onColorChange={(color) => {
+                                    if (this.canvasRef.current) {
+                                        this.canvasRef.current.changeColor(color);
+                                    }
+                                }}
+                                onBrushSizeChange={(size) => {
+                                    if (this.canvasRef.current) {
+                                        this.canvasRef.current.changeBrushSize(size);
+                                    }
+                                }}
+                                onClear={() => {
+                                    if (this.canvasRef.current) {
+                                        this.canvasRef.current.clear();
+                                    }
+                                }}
+                                onAddLayer={() => {
+                                    if (this.canvasRef.current) {
+                                        this.canvasRef.current.addNewLayer();
+                                    }
+                                }}
+                                onSelectLayer={(index) => {
+                                    if (this.canvasRef.current) {
+                                        this.canvasRef.current.changeActiveLayer(index);
+                                    }
+                                }}
+                                onToggleLayerVisibility={(index) => {
+                                    if (this.canvasRef.current) {
+                                        this.canvasRef.current.toggleLayerVisibility(index);
+                                    }
+                                }}
+                                onDeleteLayer={(index) => {
+                                    if (this.canvasRef.current) {
+                                        this.canvasRef.current.deleteLayer(index);
+                                    }
+                                }}
+                                layers={this.canvasRef.current?.state?.layers || []}
+                                activeLayer={this.canvasRef.current?.state?.activeLayer || 0}
                             />
+                            
+                            <TemplateSelector onTemplateSelected={this.handleTemplateSelected} />
+                            
+                            <div className="generate-section">
+                                <button 
+                                    className="generate-button action-button"
+                                    onClick={this.captureSpriteParts}
+                                    disabled={!selectedTemplate || isGenerating}
+                                >
+                                    {isGenerating ? 'Generating...' : 'Generate Animation Frames'}
+                                </button>
+                            </div>
                         </div>
                         
-                        <div className="bottom-panel">
-                            <div className="preview-section">
-                                <AnimationPreview frames={generatedFrames} />
+                        <div className="content-area">
+                            <div className="canvas-section">
+                                <Canvas 
+                                    ref={this.canvasRef}
+                                    template={selectedTemplate}
+                                />
                             </div>
                             
-                            <div className="export-section">
-                                <SpritesheetExporter frames={generatedFrames} />
+                            <div className="bottom-panel">
+                                <div className="preview-section">
+                                    <AnimationPreview frames={generatedFrames} />
+                                </div>
+                                
+                                <div className="export-section">
+                                    <SpritesheetExporter frames={generatedFrames} />
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </main>
+                    </main>
+                )}
+
+                {currentView === 'aiForm' && (
+                    <main className="main-content ai-form-view">
+                        <AiFormPage />
+                    </main>
+                )}
                 
                 <footer className="footer">
-                    <p>&copy; {new Date().getFullYear()} Spritesheet Generator for Godot</p>
+                    <p>&copy; {new Date().getFullYear()} Spritesheet Generator & AI Project Assistant</p>
                 </footer>
             </div>
         );
