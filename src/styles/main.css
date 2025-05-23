@@ -258,6 +258,73 @@ body {
     margin-bottom: 1rem;
 }
 
+.template-selector h2 {
+    margin-bottom: 0.8rem;
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+}
+
+.template-selector select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: white;
+    transition: border 0.3s ease;
+}
+
+.template-selector select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.template-selector .error-message {
+    margin-top: 0.6rem;
+    padding: 0.5rem;
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--accent-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.template-selector .loading-indicator {
+    margin-top: 0.6rem;
+    color: var(--primary-color);
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.template-selector select {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: white;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.template-selector select:hover {
+    border-color: var(--secondary-color);
+}
+
+.template-selector select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.error-message {
+    padding: 0.75rem;
+    background-color: rgba(231, 76, 60, 0.1);
+    border-left: 3px solid var(--accent-color);
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
 .template-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));

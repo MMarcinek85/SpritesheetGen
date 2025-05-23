@@ -155,11 +155,48 @@ export function resetTemplate(context) {
  */
 export async function loadTemplate(templateName) {
     try {
+        // Log the template being loaded for debugging
+        console.log(`Loading template: ${templateName}`);
+        
         const response = await fetch(`/templates/${templateName}.json`);
         if (!response.ok) {
             throw new Error(`Failed to load template: ${response.statusText}`);
         }
-        const template = await response.json();
+        
+        let template;
+        try {
+            template = await response.json();
+        } catch (parseError) {
+            throw new Error(`Invalid JSON format in template file: ${parseError.message}`);
+        }
+        
+        // Validate required template structure
+        if (!template) {
+            throw new Error(`Invalid template: Template is empty`);
+        }
+        
+        if (!template.name) {
+            throw new Error(`Invalid template structure: Missing name property`);
+        }
+        
+        if (!template.frames || !Array.isArray(template.frames) || template.frames.length === 0) {
+            throw new Error(`Invalid template structure: Missing or empty frames array`);
+        }
+        
+        // Check first frame for required parts
+        const firstFrame = template.frames[0];
+        if (!firstFrame.parts) {
+            throw new Error(`Invalid template structure: First frame missing parts`);
+        }
+        
+        const requiredParts = ['body', 'head', 'leftArm', 'rightArm', 'leftLeg', 'rightLeg'];
+        const missingParts = requiredParts.filter(part => !firstFrame.parts[part]);
+        if (missingParts.length > 0) {
+            throw new Error(`Invalid template structure: Missing required parts: ${missingParts.join(', ')}`);
+        }
+        
+        // Additional validation passed, log success
+        console.log(`Template ${templateName} loaded successfully with ${template.frames.length} frame(s)`);
         return template;
     } catch (error) {
         console.error(`Error loading template "${templateName}":`, error);

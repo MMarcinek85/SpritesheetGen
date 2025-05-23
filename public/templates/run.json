@@ -1,58 +1,63 @@
 {
-  "animation": {
-    "name": "Run",
-    "frames": [
-      {
-        "frame": 1,
-        "parts": {
-          "body": {
-            "position": { "x": 10, "y": 20 },
-            "size": { "width": 32, "height": 32 }
-          },
-          "leftLeg": {
-            "position": { "x": 10, "y": 40 },
-            "size": { "width": 10, "height": 20 }
-          },
-          "rightLeg": {
-            "position": { "x": 20, "y": 40 },
-            "size": { "width": 10, "height": 20 }
-          },
-          "leftArm": {
-            "position": { "x": 0, "y": 20 },
-            "size": { "width": 10, "height": 20 }
-          },
-          "rightArm": {
-            "position": { "x": 30, "y": 20 },
-            "size": { "width": 10, "height": 20 }
-          }
-        }
-      },
-      {
-        "frame": 2,
-        "parts": {
-          "body": {
-            "position": { "x": 10, "y": 20 },
-            "size": { "width": 32, "height": 32 }
-          },
-          "leftLeg": {
-            "position": { "x": 15, "y": 40 },
-            "size": { "width": 10, "height": 20 }
-          },
-          "rightLeg": {
-            "position": { "x": 10, "y": 40 },
-            "size": { "width": 10, "height": 20 }
-          },
-          "leftArm": {
-            "position": { "x": 0, "y": 20 },
-            "size": { "width": 10, "height": 20 }
-          },
-          "rightArm": {
-            "position": { "x": 30, "y": 20 },
-            "size": { "width": 10, "height": 20 }
-          }
+  "name": "run",
+  "frames": [
+    {
+      "id": 1,
+      "parts": {
+        "body": {
+          "position": { "x": 50, "y": 100 },
+          "size": { "width": 32, "height": 32 }
+        },
+        "leftLeg": {
+          "position": { "x": 50, "y": 130 },
+          "size": { "width": 10, "height": 25 }
+        },
+        "rightLeg": {
+          "position": { "x": 70, "y": 125 },
+          "size": { "width": 10, "height": 25 }
+        },
+        "leftArm": {
+          "position": { "x": 35, "y": 95 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "rightArm": {
+          "position": { "x": 75, "y": 105 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "head": {
+          "position": { "x": 50, "y": 80 },
+          "size": { "width": 32, "height": 32 }
         }
       }
-    ],
-    "duration": 500
-  }
+    },
+    {
+      "id": 2,
+      "parts": {
+        "body": {
+          "position": { "x": 50, "y": 98 },
+          "size": { "width": 32, "height": 32 }
+        },
+        "leftLeg": {
+          "position": { "x": 45, "y": 125 },
+          "size": { "width": 10, "height": 25 }
+        },
+        "rightLeg": {
+          "position": { "x": 65, "y": 130 },
+          "size": { "width": 10, "height": 25 }
+        },
+        "leftArm": {
+          "position": { "x": 30, "y": 100 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "rightArm": {
+          "position": { "x": 70, "y": 100 },
+          "size": { "width": 10, "height": 20 }
+        },
+        "head": {
+          "position": { "x": 50, "y": 78 },
+          "size": { "width": 32, "height": 32 }
+        }
+      }
+    }
+  ]
 }
