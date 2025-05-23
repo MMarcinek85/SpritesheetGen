@@ -76,10 +76,12 @@ body {
 }
 
 .sidebar {
-    width: 250px;
+    width: 280px;
     background-color: white;
     border-right: 1px solid var(--border-color);
     padding: 1rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
 }
 
 .content-area {
@@ -226,6 +228,9 @@ body {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    min-width: 70px;
 }
 
 .action-button:hover {
@@ -239,6 +244,8 @@ body {
 
 .tool-actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     justify-content: space-between;
 }
 

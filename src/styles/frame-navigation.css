@@ -1,0 +1,102 @@
+/* Canvas action buttons and frame navigation */
+.canvas-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    flex-wrap: wrap;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.canvas-button {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.canvas-button:hover {
+    background-color: #e0e0e0;
+}
+
+.canvas-button:active {
+    background-color: #d0d0d0;
+    transform: translateY(1px);
+}
+
+.clear-button {
+    background-color: #ff6666;
+    color: white;
+}
+
+.clear-button:hover {
+    background-color: #ff4444;
+}
+
+.add-frame-button {
+    background-color: #66aaff;
+    color: white;
+}
+
+.add-frame-button:hover {
+    background-color: #4488dd;
+}
+
+.duplicate-button {
+    background-color: #8c66ff;
+    color: white;
+}
+
+.duplicate-button:hover {
+    background-color: #7744dd;
+}
+
+.frames-indicator {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.frame-navigation {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.frame-navigation button {
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    color: #333;
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+.frame-navigation button:hover {
+    background-color: #e0e0e0;
+}
+
+.frame-navigation button:active {
+    background-color: #d0d0d0;
+    transform: translateY(1px);
+}
+
+.frame-navigation button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}

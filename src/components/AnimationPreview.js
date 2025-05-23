@@ -52,6 +52,16 @@ class AnimationPreview extends Component {
         const frame = frames[frameIndex];
         this.clearCanvas();
         
+        // If frame contains a dataURL (for user-created frames)
+        if (frame.dataURL) {
+            const img = new Image();
+            img.onload = () => {
+                this.ctx.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
+            };
+            img.src = frame.dataURL;
+            return;
+        }
+        
         // If frame contains a single image data URL
         if (frame.imageData) {
             const img = new Image();

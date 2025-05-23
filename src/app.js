@@ -8,6 +8,8 @@ import SpritesheetExporter from './components/SpritesheetExporter';
 import AiFormPage from './components/AiFormPage'; // Import the new component
 import { generateAnimationFrames } from './templates/templateUtils';
 import './styles/main.css';
+import './styles/frame-navigation.css';
+import './styles/preview-section.css';
 
 class App extends Component {
     constructor(props) {
@@ -16,8 +18,10 @@ class App extends Component {
             selectedTemplate: null,
             spriteParts: {}, // User-drawn sprite parts
             generatedFrames: [], // Generated animation frames
+            userCreatedFrames: [], // Frames created directly by the user
             isGenerating: false,
             currentView: 'spritesheet', // 'spritesheet' or 'aiForm'
+            activeFrameSet: 'generated' // 'generated' or 'userCreated'
         };
         
         this.canvasRef = React.createRef();
@@ -25,6 +29,14 @@ class App extends Component {
     
     handleTemplateSelected = (template) => {
         this.setState({ selectedTemplate: template });
+    };
+    
+    // Handle frames created directly by the user
+    handleFramesUpdated = (frames) => {
+        this.setState({ 
+            userCreatedFrames: frames,
+            activeFrameSet: 'userCreated' 
+        });
     };
     
     captureSpriteParts = () => {
@@ -162,16 +174,38 @@ class App extends Component {
                                 <Canvas 
                                     ref={this.canvasRef}
                                     template={selectedTemplate}
+                                    onFramesUpdated={this.handleFramesUpdated}
                                 />
                             </div>
                             
                             <div className="bottom-panel">
                                 <div className="preview-section">
-                                    <AnimationPreview frames={generatedFrames} />
+                                    <h3>Animation Preview</h3>
+                                    <div className="preview-options">
+                                        <button 
+                                            className={`frame-set-button ${this.state.activeFrameSet === 'userCreated' ? 'active' : ''}`} 
+                                            onClick={() => this.setState({activeFrameSet: 'userCreated'})}
+                                            disabled={this.state.userCreatedFrames.length === 0}
+                                        >
+                                            User Frames ({this.state.userCreatedFrames.length})
+                                        </button>
+                                        <button 
+                                            className={`frame-set-button ${this.state.activeFrameSet === 'generated' ? 'active' : ''}`}
+                                            onClick={() => this.setState({activeFrameSet: 'generated'})}
+                                            disabled={generatedFrames.length === 0}
+                                        >
+                                            Template Frames ({generatedFrames.length})
+                                        </button>
+                                    </div>
+                                    <AnimationPreview 
+                                        frames={this.state.activeFrameSet === 'generated' ? generatedFrames : this.state.userCreatedFrames} 
+                                    />
                                 </div>
                                 
                                 <div className="export-section">
-                                    <SpritesheetExporter frames={generatedFrames} />
+                                    <SpritesheetExporter 
+                                        frames={this.state.activeFrameSet === 'generated' ? generatedFrames : this.state.userCreatedFrames} 
+                                    />
                                 </div>
                             </div>
                         </div>
