@@ -13,8 +13,9 @@ export function applyTemplate(template, context, isUnderlay = true) {
     // Default to first frame for drawing template
     const frame = template.frames[0];
     
-    // Calculate scaling factor (make template 3x larger)
-    const scaleFactor = 3.0;
+    // Calculate scaling factor - dynamically adjust based on canvas size
+    // Base scale of 6.0 works for 800x600, but adjust as needed
+    const baseScaleFactor = 6.0;
     
     // Get canvas dimensions
     const canvasWidth = context.canvas.width;
@@ -33,20 +34,28 @@ export function applyTemplate(template, context, isUnderlay = true) {
     const templateWidth = maxX - minX;
     const templateHeight = maxY - minY;
     
-    // Calculate translation to center the template
+    // Dynamically adjust scale factor based on template size and canvas dimensions
+    // This ensures the template fits well regardless of canvas size
+    const widthScale = (canvasWidth * 0.8) / templateWidth;  // Use 80% of canvas width
+    const heightScale = (canvasHeight * 0.8) / templateHeight; // Use 80% of canvas height
+    const scaleFactor = Math.min(widthScale, heightScale, baseScaleFactor * 1.2); // Don't go too large
+    
+    // Calculate translation to properly center the template
     const translateX = (canvasWidth - templateWidth * scaleFactor) / 2 - minX * scaleFactor;
-    const translateY = (canvasHeight - templateHeight * scaleFactor) / 2 - minY * scaleFactor;
+    // Position slightly above center for better composition (characters typically need more space below)
+    const translateY = (canvasHeight - templateHeight * scaleFactor) / 2 - minY * scaleFactor - (canvasHeight * 0.05);
     
     // Set rendering styles based on whether it's an underlay or overlay
     if (isUnderlay) {
-        context.globalAlpha = 0.2; // Faded for underlays
-        context.strokeStyle = '#999999';
-        context.fillStyle = '#eeeeee';
+        context.globalAlpha = 0.25; // Visible but not distracting for underlays
+        context.strokeStyle = '#444444'; // Darker stroke for better visibility
+        context.fillStyle = '#f0f0f0'; // Light fill for better contrast
+        context.lineWidth = 1.5; // Slightly thicker lines
     } else {
-        context.globalAlpha = 0.6; // More visible for overlays
-        context.strokeStyle = '#333333';
-        context.lineWidth = 1;
-        context.setLineDash([3, 3]); // Dashed lines for overlays
+        context.globalAlpha = 0.75; // More visible for overlays when actively drawing
+        context.strokeStyle = '#222222'; // Very dark for clear outline visibility
+        context.lineWidth = 2; // Thicker lines for better visibility
+        context.setLineDash([5, 5]); // More visible dashes for overlays
     }
     
     // Save context state before transformations
@@ -72,10 +81,26 @@ export function applyTemplate(template, context, isUnderlay = true) {
         }
         context.stroke();
         
-        // Add part name label
-        context.font = '12px Arial';
-        context.fillStyle = isUnderlay ? '#666666' : '#000000';
+        // Add part name label with larger font size proportional to the scale factor
+        context.font = '4px Arial'; // Smaller base font since we're scaling up
+        context.fillStyle = isUnderlay ? '#444444' : '#000000'; // Darker text for better readability
         context.textAlign = 'center';
+        context.textBaseline = 'middle'; // Better vertical alignment
+        
+        // Add a slight background for better text visibility
+        if (!isUnderlay) {
+            const textWidth = context.measureText(partName).width;
+            const padding = 2;
+            context.fillStyle = 'rgba(255,255,255,0.7)';
+            context.fillRect(
+                part.position.x + part.size.width / 2 - textWidth / 2 - padding,
+                part.position.y + part.size.height / 2 - 4 - padding,
+                textWidth + padding * 2,
+                8 + padding * 2
+            );
+            context.fillStyle = '#000000';
+        }
+        
         context.fillText(
             partName,
             part.position.x + part.size.width / 2,
