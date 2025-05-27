@@ -203,8 +203,15 @@ Once you've filled out this form, you're ready to share it with an AI assistant!
 
 **Suggested Prompt to Use with an AI:**
 
-> Hi! I've used the 'AI Project Requirements & Design Assistant Form' to detail my project idea. The completed form is [attached/pasted below].  
-> Please review it carefully. I'm particularly interested in the outputs I've selected in Section 8.3 ('What do you want the AI to help you generate first?'). Could you please generate those for me, using all the information I've provided in the form as context?  
-> If anything in the form is unclear, or if you need more details to best address my requests from Section 8.3, please feel free to ask. I'm excited to see how you can help me kickstart this project!
+> I want to create a coding project and I've filled out a requirements form. Please analyze my answers and help me plan and build this project step by step.
+>
+> Please review my form responses and:
+> 1. Suggest the best technologies and frameworks for my project
+> 2. Create a detailed project structure
+> 3. Help me break down the development into manageable tasks
+> 4. Provide code examples and guidance for implementation
+> 5. Suggest best practices and potential challenges to consider
+>
+> Here is my completed requirements form: [Please paste or attach your downloaded form file here]
 
 Remember to replace `[attached/pasted below]` with your actual filled-out form content (which you'll need to copy manually from the text you've entered into a saved version of this form) when you use this prompt.

@@ -116,6 +116,7 @@ const AiFormPage = () => {
         let inOlList = false;
         let olItems = [];
         let currentListNumber = 1;
+        let renderedAiPrompt = false;
         
         // Use the latest answers state directly
         const currentAnswers = answers || {};
@@ -157,9 +158,7 @@ const AiFormPage = () => {
                 inOlList = false;
                 currentListNumber = 1;
             }
-        };
-
-        const closeAllLists = () => {
+        };        const closeAllLists = () => {
             closeCheckboxList();
             closeUlList();
             closeOlList();
@@ -180,9 +179,7 @@ const AiFormPage = () => {
                     elements.push(<div key={`empty-${index}`} className="empty-line" />);
                 }
                 return;
-            }
-
-            // 1. Horizontal Rule
+            }            // 1. Horizontal Rule
             if (trimmedLine === '---') {
                 closeAllLists();
                 elements.push(<hr key={`hr-${index}`} />);
@@ -258,7 +255,6 @@ const AiFormPage = () => {
             if (checkboxMatch) {
                 closeUlList();
                 closeOlList();
-                
                 // Moved labelText and isOtherOption definitions up for early access in debug log
                 const currentLabelText = checkboxMatch[2]; 
                 const currentIsOtherOption = currentLabelText.toLowerCase().includes('other') || 
@@ -350,25 +346,73 @@ const AiFormPage = () => {
             }
 
             // If we get here, we're not in a list item, so close any open lists
-            closeAllLists();
+            // but not the AI prompt blockquote, as it can span multiple lines.
+            closeCheckboxList();
+            closeUlList();
+            closeOlList();
 
-            // Headers and other special content
-            if (trimmedLine.startsWith('#')) {
+
+            // Specific handler for the "**Suggested Prompt to Use with an AI:**" line
+            const targetBoldedLine = "**Suggested Prompt to Use with an AI:**";
+            const displayTextForButtonSection = "Suggested Prompt to Use with an AI:";
+
+            if (trimmedLine === targetBoldedLine) {
+                elements.push(
+                    <div key={`suggested-prompt-container-${index}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', marginTop: '20px' }}>
+                        <h3 style={{ margin: '0', marginRight: '10px', flexGrow: 1 }}>{displayTextForButtonSection}</h3>
+                        <button
+                            key={`copy-prompt-btn-${index}`}
+                            onClick={copyPromptToClipboard}
+                            className="action-button copy-prompt-button"
+                            style={{ whiteSpace: 'nowrap' }}
+                        >
+                            Copy Suggested AI Prompt
+                        </button>
+                    </div>
+                );
+                elements.push(
+                    <p key={`copy-prompt-desc-${index}`} style={{fontSize: '0.9em', marginTop: '5px', marginBottom: '15px', width: '100%'}}>
+                        <em>Copies a template prompt for when you submit your form to an AI. Remember to attach/paste your downloaded form.</em>
+                    </p>
+                );
+                // Render the hardcoded prompt text in a single blue box, only once
+                if (!renderedAiPrompt) {
+                    const promptText = `I want to create a coding project and I've filled out a requirements form. Please analyze my answers and help me plan and build this project step by step.\n\nPlease review my form responses and:\n1. Suggest the best technologies and frameworks for my project\n2. Create a detailed project structure\n3. Help me break down the development into manageable tasks\n4. Provide code examples and guidance for implementation\n5. Suggest best practices and potential challenges to consider\n\nHere is my completed requirements form: [Please paste or attach your downloaded form file here]`;
+                    elements.push(
+                        <div key="ai-prompt-single-block" className="ai-prompt-suggestion" style={{whiteSpace: 'pre-line', marginTop: 10, marginBottom: 20}}>
+                            {promptText}
+                        </div>
+                    );
+                    renderedAiPrompt = true;
+                }
+                return;
+            }            // Skip blockquotes in the markdown since we're using hardcoded prompt
+            else if (trimmedLine.startsWith('> ')) {
+                // Skip blockquote lines entirely - they're replaced by our hardcoded prompt
+                return;
+            }
+            // Process actual Markdown Headers (e.g., #, ##, ###)
+            else if (trimmedLine.startsWith('#')) {
                 const formattedHeader = formatLineAsHtml(trimmedLine);
                 if (formattedHeader) {
                     elements.push(<div key={`header-${index}`} dangerouslySetInnerHTML={{ __html: formattedHeader }} />);
                 }
                 return;
             }
-
-            // Regular content
-            const formattedLine = formatLineAsHtml(trimmedLine);
-            if (formattedLine) {
-                elements.push(<div key={`line-${index}`} dangerouslySetInnerHTML={{ __html: formattedLine }} />);
+            // Process all other regular content lines
+            else {
+                const formattedLine = formatLineAsHtml(trimmedLine);
+                if (formattedLine) {
+                    // Avoid wrapping the "Suggested Prompt..." H3 again if formatLineAsHtml adds <p>
+                    if (trimmedLine === targetBoldedLine) {
+                        // Already handled, but if formatLineAsHtml was called, it might wrap it.
+                        // This path should ideally not be hit for the targetBoldedLine if handled above.
+                    } else {
+                        elements.push(<div key={`line-${index}`} dangerouslySetInnerHTML={{ __html: formattedLine }} />);
+                    }
+                }
             }
-        });
-
-        closeAllLists();
+        });        closeAllLists();
         return elements;
     }
 
@@ -378,16 +422,19 @@ const AiFormPage = () => {
             return;
         }
         
-        // Use the ref for stable access to current answers state
         const currentAnswers = answersRef.current;
         
         try {
             let output = `# AI Project Requirements - My Answers\n\n`;
             const lines = markdownContent.split('\n');
-            let currentQuestionContextId = null;
+            let currentQuestionContextId = null; 
     
             lines.forEach(line => {
-                if (!line) return;
+                if (!line && !line.trim()) { // Keep empty lines from markdown for spacing if they are not just whitespace
+                    output += '\n';
+                    return;
+                }
+                if (!line.trim()) return; // Skip lines that are only whitespace
                 
                 const trimmedLine = line.trim();
                 const questionIdMatch = trimmedLine.match(/^\*\s*\*\*(\d+\.\d+)\.\s*([^:]+):/);
@@ -399,7 +446,14 @@ const AiFormPage = () => {
                     output += `${line}\n`;
                 } else if (isAnswerLine) {
                     output += `${line}\n`;
-                    output += `        \`\`\`text\n${currentAnswers[currentQuestionContextId] || 'No answer provided.'}\n        \`\`\`\n\n`;
+                    let answerText = 'No answer provided.';
+                    for (const key in currentAnswers) {
+                        if (key.startsWith(`field-${currentQuestionContextId}-`)) {
+                            answerText = currentAnswers[key] || 'No answer provided.';
+                            break; 
+                        }
+                    }
+                    output += `        \`\`\`text\n${answerText}\n        \`\`\`\n\n`;
                 } else if (checkboxMatch) {
                     const labelText = checkboxMatch[2];
                     const checkboxId = `checkbox-${currentQuestionContextId}-${labelText.trim().toLowerCase().replace(/\W+/g, '-')}`;
@@ -425,29 +479,92 @@ const AiFormPage = () => {
         }
     };
 
+    const generateTxtOutput = (markdown, answers) => {
+        let output = "AI Project Requirements - My Answers (Text Version)\n\n";
+        const lines = markdown.split('\n');
+        let currentQuestionNumber = null;
+        let currentSectionTitle = "";
+    
+        lines.forEach(line => {
+            const trimmedLine = line.trim();
+    
+            const sectionHeaderMatch = trimmedLine.match(/^##\s+(.*)/); // e.g., ## 1. Your Project Idea
+            const questionMatch = trimmedLine.match(/^\*\s*\*\*(\d+\.\d+(.\d+)?)\.\s*([^:]+):/); // e.g., * **1.1. Project Title/Name:**
+            const checkboxMatch = trimmedLine.match(/^\s*\*\s*\[( |x)\]\s*(.*)/i); // e.g., * [ ] Web browser
+            const yourAnswerMarker = trimmedLine.toLowerCase().startsWith('* your answer') || trimmedLine.toLowerCase().startsWith('*   your answer');
+            const descriptiveLine = !questionMatch && !checkboxMatch && !yourAnswerMarker && !sectionHeaderMatch && 
+                                   trimmedLine && !trimmedLine.startsWith('---') && !trimmedLine.startsWith('<!--') && 
+                                   !trimmedLine.startsWith('>') && !trimmedLine.startsWith('**Instructions:**') && !trimmedLine.startsWith('**Hello Future Developer!') &&
+                                   !trimmedLine.startsWith('**Thank you for your detailed input!') && !trimmedLine.startsWith('**Suggested Prompt to Use with an AI:') &&
+                                   !trimmedLine.match(/^Remember to replace/);
+
+
+            if (sectionHeaderMatch) {
+                currentSectionTitle = sectionHeaderMatch[1].trim();
+                output += `\n${currentSectionTitle.toUpperCase()}\n====================================\n`;
+                currentQuestionNumber = null; 
+            } else if (questionMatch) {
+                currentQuestionNumber = questionMatch[1];
+                const questionText = questionMatch[3].trim();
+                output += `\n${currentQuestionNumber}. ${questionText}:\n`;
+            } else if (checkboxMatch && currentQuestionNumber) {
+                const labelText = checkboxMatch[2].trim();
+                const checkboxId = `checkbox-${currentQuestionNumber}-${labelText.toLowerCase().replace(/\W+/g, '-')}`;
+                const isChecked = !!answers[checkboxId];
+                output += `  [${isChecked ? 'x' : ' '}] ${labelText}\n`;
+            } else if (yourAnswerMarker && currentQuestionNumber) {
+                let answerText = 'No answer provided.';
+                for (const key in answers) {
+                    if (key.startsWith(`field-${currentQuestionNumber}-`)) {
+                        answerText = answers[key] || 'No answer provided.';
+                        break;
+                    }
+                }
+                output += `\n  Your Answer:\n    ${answerText.split('\n').join('\n    ')}\n`;
+            } else if (descriptiveLine && (trimmedLine.startsWith('Common options:') || trimmedLine.startsWith('*   Example:'))) {
+                 output += `  ${trimmedLine}\n`;
+            }
+        });
+        return output;
+    };
+
+    const handleDownloadAnswersAsTxt = () => {
+        if (!markdownContent) {
+            alert('Error: Form content is missing. Please refresh the page and try again.');
+            return;
+        }
+        const currentAnswers = answersRef.current;
+        try {
+            const txtOutput = generateTxtOutput(markdownContent, currentAnswers);
+            const blob = new Blob([txtOutput], { type: 'text/plain;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'AI_Project_Filled_Form.txt';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Failed to download TXT answers:", error);
+            alert('There was an error downloading your answers as TXT. Please try again.');
+        }
+    };
+    
     const copyPromptToClipboard = async () => {
-        const prompt = `I want to create a coding project and I've filled out a requirements form. Please analyze my answers and help me plan and build this project step by step.
-
-Please review my form responses and:
-1. Suggest the best technologies and frameworks for my project
-2. Create a detailed project structure
-3. Help me break down the development into manageable tasks
-4. Provide code examples and guidance for implementation
-5. Suggest best practices and potential challenges to consider
-
-Here is my completed requirements form: [Please paste or attach your downloaded form file here]`;
+        const promptText = `I want to create a coding project and I've filled out a requirements form. Please analyze my answers and help me plan and build this project step by step.\r\n\r\nPlease review my form responses and:\r\n1. Suggest the best technologies and frameworks for my project\r\n2. Create a detailed project structure\r\n3. Help me break down the development into manageable tasks\r\n4. Provide code examples and guidance for implementation\r\n5. Suggest best practices and potential challenges to consider\r\n\r\nHere is my completed requirements form: [Please paste or attach your downloaded form file here]`;
 
         try {
             // First try using the modern Clipboard API
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(prompt);
+                await navigator.clipboard.writeText(promptText);
                 alert('Suggested AI prompt copied to clipboard!');
                 return;
             }
             
             // Fall back to the older execCommand method
             const textArea = document.createElement('textarea');
-            textArea.value = prompt;
+            textArea.value = promptText; // Ensure this uses the correct promptText variable
             // Make the textarea out of viewport
             textArea.style.position = 'fixed';
             textArea.style.left = '-999999px';
@@ -510,14 +627,14 @@ Here is my completed requirements form: [Please paste or attach your downloaded 
                     <button onClick={handleDownloadAnswers} className="action-button download-button">
                         Download Completed Form (Markdown)
                     </button>
-                    <p style={{fontSize: '0.9em', marginTop: '5px'}}>
+                    <p style={{fontSize: '0.9em', marginTop: '5px', marginBottom: '15px'}}>
                         <em>Download your answers in a Markdown file to share with an AI.</em>
                     </p>
-                    <button onClick={copyPromptToClipboard} className="action-button copy-prompt-button" style={{marginTop: '15px'}}>
-                        Copy Suggested AI Prompt
+                    <button onClick={handleDownloadAnswersAsTxt} className="action-button download-button">
+                        Download Completed Form (TXT)
                     </button>
                     <p style={{fontSize: '0.9em', marginTop: '5px'}}>
-                        <em>Copies a template prompt for when you submit your form to an AI. Remember to attach/paste your downloaded form.</em>
+                        <em>Download your answers in a plain text file.</em>
                     </p>
                 </div>
             </>
